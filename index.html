@@ -103,14 +103,14 @@
 <div class="login-card">
     <div class="bank-title">दि मुंबई को-ऑपरेटिव्ह क्रेडिट सोसायटी लिमिटेड</div>
     <div class="bank-sub">THE MUMBAI CO-OP. CREDIT SOCIETY LIMITED</div>
-    <div class="reg-no">नोंदणी क्र. बी. ओ. एम./डब्ल्यू. टी./आर एस आर/ सी. आर. /१३१४/ सन १९९१-९२</div>
+    <div class="reg-no">नोंदणी क्र. बी. ओ. एम./डब्ल्यू. टी./आर एस आर/ सी. आर. /१३१४/ सन १९१९१-९२</div>
 
     <div class="nav-tabs">
         <div class="tab active" id="memberTab">👤 Member Login</div>
         <div class="tab" id="adminTab">⚙️ Staff / Admin</div>
     </div>
 
-    <form id="loginForm" onsubmit="return handleLogin(event)">
+    <form id="portalLoginForm" onsubmit="return startLogin(event)">
         <div class="form-group">
             <label>Username / खाता क्रमांक</label>
             <input type="text" id="username" class="input-box" placeholder="Enter Username" required>
@@ -145,11 +145,11 @@ document.getElementById('adminTab').onclick = function() {
     document.getElementById('memberTab').classList.remove('active');
 };
 
-function handleLogin(e) {
+function startLogin(e) {
     if(e) e.preventDefault();
-    var user = document.getElementById('username').value.trim();
+    var userVal = document.getElementById('username').value.trim();
     
-    if (currentRole === 'admin' || user === 'admin') {
+    if (currentRole === 'admin' || userVal === 'admin') {
         window.location.href = 'admin-dashboard.html';
     } else {
         window.location.href = 'customer-dashboard.html';
