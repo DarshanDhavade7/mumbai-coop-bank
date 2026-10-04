@@ -103,14 +103,14 @@
 <div class="login-card">
     <div class="bank-title">दि मुंबई को-ऑपरेटिव्ह क्रेडिट सोसायटी लिमिटेड</div>
     <div class="bank-sub">THE MUMBAI CO-OP. CREDIT SOCIETY LIMITED</div>
-    <div class="reg-no">नोंदणी क्र. बी. ओ. एम./डब्ल्यू. टी./आर एस आर/ सी. आर. /१३१४/ सन १९१९१-९२</div>
+    <div class="reg-no">नोंदणी क्र. बी. ओ. एम./डब्ल्यू. टी./आर एस आर/ सी. आर. /१३१४/ सन १९९१-९२</div>
 
     <div class="nav-tabs">
         <div class="tab active" id="memberTab">👤 Member Login</div>
         <div class="tab" id="adminTab">⚙️ Staff / Admin</div>
     </div>
 
-    <form id="portalLoginForm" onsubmit="return startLogin(event)">
+    <form id="portalLoginForm" onsubmit="return directLogin(event)">
         <div class="form-group">
             <label>Username / खाता क्रमांक</label>
             <input type="text" id="username" class="input-box" placeholder="Enter Username" required>
@@ -131,25 +131,25 @@
 </div>
 
 <script>
-let currentRole = 'member';
+let activeRole = 'member';
 
-document.getElementById('memberTab').onclick = function() {
-    currentRole = 'member';
+document.getElementById('memberTab').addEventListener('click', function() {
+    activeRole = 'member';
     this.classList.add('active');
     document.getElementById('adminTab').classList.remove('active');
-};
+});
 
-document.getElementById('adminTab').onclick = function() {
-    currentRole = 'admin';
+document.getElementById('adminTab').addEventListener('click', function() {
+    activeRole = 'admin';
     this.classList.add('active');
     document.getElementById('memberTab').classList.remove('active');
-};
+});
 
-function startLogin(e) {
+function directLogin(e) {
     if(e) e.preventDefault();
-    var userVal = document.getElementById('username').value.trim();
+    const u = document.getElementById('username').value.trim();
     
-    if (currentRole === 'admin' || userVal === 'admin') {
+    if (activeRole === 'admin' || u === 'admin') {
         window.location.href = 'admin-dashboard.html';
     } else {
         window.location.href = 'customer-dashboard.html';
