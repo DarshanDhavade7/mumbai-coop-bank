@@ -1,26 +1,19 @@
-const express = require('express');
-const path = require('path');
-const authRoutes = require('./src/config/routes/authRoutes');
-const customerRoutes = require('./src/config/routes/customerRoutes');
-const adminRoutes = require('./src/config/routes/adminRoutes');
+document.addEventListener('DOMContentLoaded', () => {
+    const forms = document.querySelectorAll('form');
 
-const app = express();
+    forms.forEach(form => {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
 
-// Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+            const usernameInput = document.querySelector('input[type="text"]') || document.getElementById('username');
+            const username = usernameInput ? usernameInput.value.trim() : '';
 
-// Serve Static Files from Public Directory
-app.use(express.static(path.join(__dirname, 'public')));
+            if (username === 'admin') {
+                window.location.href = 'admin-dashboard.html';
+                return;
+            }
 
-// API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/customer', customerRoutes);
-app.use('/api/admin', adminRoutes);
-
-// Home Route
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+            window.location.href = 'customer-dashboard.html';
+        });
+    });
 });
-
-module.exports = app;
