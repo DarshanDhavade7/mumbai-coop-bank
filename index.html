@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Mumbai Co-Op. Credit Society Limited</title>
-    <link rel="stylesheet" href="style.css">
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -24,10 +23,6 @@
             border-radius: 12px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.1);
             text-align: center;
-        }
-        .logo {
-            width: 80px;
-            margin-bottom: 15px;
         }
         .bank-title {
             color: #800000;
@@ -106,7 +101,6 @@
 <body>
 
 <div class="login-card">
-    <img src="logo.png" alt="Logo" class="logo" onerror="this.style.display='none'">
     <div class="bank-title">दि मुंबई को-ऑपरेटिव्ह क्रेडिट सोसायटी लिमिटेड</div>
     <div class="bank-sub">THE MUMBAI CO-OP. CREDIT SOCIETY LIMITED</div>
     <div class="reg-no">नोंदणी क्र. बी. ओ. एम./डब्ल्यू. टी./आर एस आर/ सी. आर. /१३१४/ सन १९९१-९२</div>
@@ -116,7 +110,7 @@
         <div class="tab" id="adminTab">⚙️ Staff / Admin</div>
     </div>
 
-    <form id="portalLoginForm">
+    <form id="loginForm" onsubmit="return handleLogin(event)">
         <div class="form-group">
             <label>Username / खाता क्रमांक</label>
             <input type="text" id="username" class="input-box" placeholder="Enter Username" required>
@@ -137,44 +131,31 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    let currentRole = 'member';
+let currentRole = 'member';
 
-    const memberTab = document.getElementById('memberTab');
-    const adminTab = document.getElementById('adminTab');
+document.getElementById('memberTab').onclick = function() {
+    currentRole = 'member';
+    this.classList.add('active');
+    document.getElementById('adminTab').classList.remove('active');
+};
 
-    if(memberTab && adminTab) {
-        memberTab.addEventListener('click', () => {
-            currentRole = 'member';
-            memberTab.classList.add('active');
-            adminTab.classList.remove('active');
-        });
+document.getElementById('adminTab').onclick = function() {
+    currentRole = 'admin';
+    this.classList.add('active');
+    document.getElementById('memberTab').classList.remove('active');
+};
 
-        adminTab.addEventListener('click', () => {
-            currentRole = 'admin';
-            adminTab.classList.add('active');
-            memberTab.classList.remove('active');
-        });
+function handleLogin(e) {
+    if(e) e.preventDefault();
+    var user = document.getElementById('username').value.trim();
+    
+    if (currentRole === 'admin' || user === 'admin') {
+        window.location.href = 'admin-dashboard.html';
+    } else {
+        window.location.href = 'customer-dashboard.html';
     }
-
-    const form = document.getElementById('portalLoginForm');
-    if (form) {
-        form.onsubmit = function(e) {
-            e.preventDefault();
-            
-            const usernameInput = document.getElementById('username');
-            const username = usernameInput ? usernameInput.value.trim() : '';
-
-            // Direct local navigation without any alert popups
-            if (currentRole === 'admin' || username === 'admin') {
-                window.location.href = 'admin-dashboard.html';
-            } else {
-                window.location.href = 'customer-dashboard.html';
-            }
-            return false;
-        };
-    }
-});
+    return false;
+}
 </script>
 
 </body>
