@@ -21,9 +21,11 @@ const db = new sqlite3.Database(dbPath, (err) => {
     }
 });
 
-// Table Initialization with Real Names & Balances
+// Table Initialization with Safe Reset to avoid column mismatch
 db.serialize(() => {
-    db.run(`CREATE TABLE IF NOT EXISTS users (
+    db.run(`DROP TABLE IF EXISTS users`);
+    
+    db.run(`CREATE TABLE users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE,
         password TEXT,
@@ -31,13 +33,15 @@ db.serialize(() => {
         name TEXT,
         account_no TEXT,
         balance REAL
-    )`);
+    )`, (err) => {
+        if (!err) {
+            db.run(`INSERT INTO users (username, password, role, name, account_no, balance) 
+                    VALUES ('user1', '123456', 'member', 'Darshan Dhavade', 'MCB100123', 54250.00)`);
 
-    db.run(`INSERT OR IGNORE INTO users (username, password, role, name, account_no, balance) 
-            VALUES ('user1', '123456', 'member', 'Darshan Dhavade', 'MCB100123', 54250.00)`);
-
-    db.run(`INSERT OR IGNORE INTO users (username, password, role, name, account_no, balance) 
-            VALUES ('admin', 'admin123', 'admin', 'System Admin', 'MCB000001', 0.00)`);
+            db.run(`INSERT INTO users (username, password, role, name, account_no, balance) 
+                    VALUES ('admin', 'admin123', 'admin', 'System Admin', 'MCB000001', 0.00)`);
+        }
+    });
 });
 
 // Login API with User Details and OTP verification support
@@ -45,14 +49,10 @@ app.post(['/api/auth/login', '/api/login'], (req, res) => {
     const { username, password } = req.body;
 
     db.get(`SELECT * FROM users WHERE username = ? AND password = ?`, [username, password], (err, row) => {
-        if (err) {
-            return res.json({ success: false, message: "Database error" });
-        }
-        if (!row) {
+        if (err || !row) {
             return res.json({ success: false, message: "Invalid username or password" });
         }
 
-        // Successful login returns role and redirect path
         const redirectPage = row.role === 'admin' ? 'admin-dashboard.html' : 'customer-dashboard.html';
         res.json({
             success: true,
