@@ -1,0 +1,13 @@
+{
+  "name": "bank-security-project",
+  "version": "1.0.0",
+  "description": "Banking Application Prototype",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "sqlite3": "^5.1.6"
+  }
+}

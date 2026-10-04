@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Portal - The Mumbai Co-Op. Credit Society Ltd.</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <style>
+        :root {
+            --brand-red: #d9232d;
+            --brand-blue: #1b365d;
+            --bg-light: #f4f6f9;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-bottom: 30px;
+        }
+
+        .navbar-theme { background-color: var(--brand-red); }
+
+        .mumbai-logo-nav {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border: 2px solid white;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mumbai-logo-nav .emblem-m {
+            font-size: 1.1rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #d9232d 50%, #1b365d 50%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+            line-height: 1;
+        }
+
+        .account-card {
+            background: linear-gradient(135deg, #d9232d, #800a10);
+            color: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 16px rgba(217, 35, 45, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #555;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .action-box {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 15px 10px;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            cursor: pointer;
+            border: 1px solid #eef0f3;
+            transition: transform 0.2s;
+        }
+
+        .action-box:hover {
+            transform: translateY(-2px);
+        }
+
+        .action-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: #fce8e9;
+            color: var(--brand-red);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px auto;
+            font-size: 1.2rem;
+        }
+
+        .action-label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+
+        .transaction-item {
+            background: white;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #ccc;
+        }
+
+        .transaction-item.debit { border-left-color: #d9232d; }
+        .transaction-item.credit { border-left-color: #2e7d32; }
+
+        .amount-debit { color: #d9232d; font-weight: bold; }
+        .amount-credit { color: #2e7d32; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-dark navbar-theme px-3 py-2 shadow-sm sticky-top">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <span class="navbar-brand mb-0 h6 fw-bold d-flex align-items-center gap-2">
+                <span class="mumbai-logo-nav">
+                    <span class="emblem-m">m</span>
+                </span>
+                The Mumbai Co-Op. Credit Society Ltd.
+            </span>
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-sm btn-light rounded-pill px-3 fw-bold text-danger" data-bs-toggle="modal" data-bs-target="#aboutModal">
+                    <i class="fa-solid fa-circle-info me-1"></i> About Us
+                </button>
+                <button id="logoutBtn" class="btn btn-sm btn-outline-light rounded-pill px-3">
+                    <i class="fa-solid fa-right-from-bracket me-1"></i> Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-3" style="max-width: 600px;">
+
+        <div class="d-flex align-items-center justify-content-between mb-3 px-1">
+            <div>
+                <small class="text-muted d-block">Welcome,</small>
+                <h5 class="fw-bold mb-0 text-dark" id="userNameDisplay">Customer User</h5>
+            </div>
+            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Active Member</span>
+        </div>
+
+        <div class="account-card mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="badge bg-white text-danger fw-bold px-2 py-1">01 Savings Account</span>
+                <i class="fa-solid fa-eye text-white-50" style="cursor: pointer;"></i>
+            </div>
+            <div class="mt-3">
+                <small class="text-white-50 d-block">Total Available Balance</small>
+                <h2 class="fw-bold mb-1" id="currentBalanceDisplay">₹ 0.00</h2>
+                <small class="text-white-50" id="accNoDisplay">Acc No: 0357XXXXXXXX5806</small>
+            </div>
+        </div>
+
+        <div class="section-title">Pay & Transfer</div>
+        <div class="row g-2 mb-4">
+            <div class="col-3"><div class="action-box"><div class="action-icon"><i class="fa-solid fa-money-bill-transfer"></i></div><p class="action-label">Fund Transfer</p></div></div>
+            <div class="col-3"><div class="action-box"><div class="action-icon"><i class="fa-solid fa-qrcode"></i></div><p class="action-label">UPI Pay</p></div></div>
+            <div class="col-3"><div class="action-box"><div class="action-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div><p class="action-label">Bill Pay</p></div></div>
+            <div class="col-3"><div class="action-box"><div class="action-icon"><i class="fa-solid fa-hand-holding-dollar"></i></div><p class="action-label">Quick Pay</p></div></div>
+        </div>
+
+        <div class="section-title">Services & Statement</div>
+        <div class="row g-2 mb-4">
+            <div class="col-3" data-bs-toggle="modal" data-bs-target="#statementModal"><div class="action-box"><div class="action-icon"><i class="fa-solid fa-book-open"></i></div><p class="action-label">mPassbook</p></div></div>
+            <div class="col-3" data-bs-toggle="modal" data-bs-target="#aboutModal"><div class="action-box"><div class="action-icon"><i class="fa-solid fa-landmark-flag"></i></div><p class="action-label">About Society</p></div></div>
+            <div class="col-3"><div class="action-box"><div class="action-icon"><i class="fa-solid fa-piggy-bank"></i></div><p class="action-label">Open FD/RD</p></div></div>
+            <div class="col-3"><div class="action-box"><div class="action-icon"><i class="fa-solid fa-headset"></i></div><p class="action-label">Support</p></div></div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="section-title mb-0">Recent Transactions</div>
+            <a href="#" class="text-danger fw-bold" style="font-size: 0.8rem; text-decoration: none;" data-bs-toggle="modal" data-bs-target="#statementModal">View Statement</a>
+        </div>
+
+        <div id="homepageTransactions"></div>
+
+    </div>
+
+    <!-- Exact Board Documentation About Us Modal -->
+    <div class="modal fade" id="aboutModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header text-white" style="background-color: var(--brand-red);">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-building-columns me-2"></i> About Society & Board</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="text-center mb-3">
+                        <div class="mumbai-logo-nav mx-auto mb-2" style="width: 52px; height: 52px; border: 3px solid var(--brand-red);">
+                            <span class="emblem-m" style="font-size: 1.6rem;">m</span>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-0">दि मुंबई को-ऑपरेटिव्ह क्रेडिट सोसायटी लिमिटेड</h5>
+                        <small class="text-muted fw-bold">THE MUMBAI CO-OP. CREDIT SOCIETY LIMITED</small>
+                        <small class="d-block text-danger fw-bold mt-1" style="font-size: 0.78rem;">
+                            नोंदणी क्र. बी. ओ. एम./डब्ल्यू. टी./आर एस आर/ सी. आर. /१३१४/ सन १९९१-९२
+                        </small>
+                    </div>
+
+                    <div class="row g-3 my-2">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded border h-100">
+                                <strong class="d-block text-danger small mb-1"><i class="fa-solid fa-location-dot me-1"></i> Branch Address</strong>
+                                <p class="mb-0 small text-dark fw-semibold">Shop No. B-22, Plot No. 13 & 14, Amruta Sadan, Sector-22, Nerul (West), Navi Mumbai - 400706</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded border h-100">
+                                <strong class="d-block text-danger small mb-1"><i class="fa-solid fa-phone me-1"></i> Contact Numbers</strong>
+                                <p class="mb-0 small text-dark fw-semibold">9326068188 / 9137604189</p>
+                                <small class="text-muted">Landmark: Late Nama Daji Bhopi Marg</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <h6 class="fw-bold text-dark mb-2 border-bottom pb-1"><i class="fa-solid fa-users me-1 text-danger"></i> Executive Board Members (कार्यकारी मंडळ):</h6>
+                        <div class="row g-2 small text-muted">
+                            <div class="col-6"><strong>संस्थापक / अध्यक्ष:</strong> श्री. सी. एम. शिंगारे</div>
+                            <div class="col-6"><strong>उपाध्यक्ष:</strong> श्री. विनायक रामचंद्र बेटकर</div>
+                            <div class="col-6"><strong>सचिव:</strong> श्री. संतोष नारायण दरडे</div>
+                            <div class="col-6"><strong>खजिनदार:</strong> श्री. आबाजी शामराव पाटील</div>
+                            <div class="col-6"><strong>उपखजिनदार:</strong> श्री. आनंद दिनकर पारंधे</div>
+                            <div class="col-6"><strong>सल्लागार:</strong> श्री. विलास ज्ञानदेव इतलकर</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light py-2">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statement Modal -->
+    <div class="modal fade" id="statementModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header text-white" style="background-color: var(--brand-red);">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-file-lines me-2"></i> Account Statement</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="statementForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted">Select Account</label>
+                                <select class="form-select form-select-sm" id="modalAccSelect">
+                                    <option selected>0357XXXXXXXX5806 (Savings Account)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted">Select Period</label>
+                                <select class="form-select form-select-sm" id="periodSelect">
+                                    <option value="all" selected>All Transactions (2025 - 2026)</option>
+                                    <option value="2026">Year 2026</option>
+                                    <option value="2025">Year 2025</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="button" id="searchBtn" class="btn btn-danger w-100 fw-bold mt-3" style="background-color: var(--brand-red);">
+                            Search Statement
+                        </button>
+                    </form>
+
+                    <div class="mt-4" id="statementResultSection" style="display: none;">
+                        <h6 class="fw-bold border-bottom pb-2 mb-3">Statement Results</h6>
+                        <div id="statementList" style="max-height: 280px; overflow-y: auto;"></div>
+                    </div>
+                </div>
+
+                <div class="modal-footer justify-content-between bg-light">
+                    <button id="downloadPdfBtn" class="btn btn-outline-danger btn-sm fw-bold"><i class="fa-solid fa-file-pdf me-1"></i> Download PDF</button>
+                    <button id="downloadXlsBtn" class="btn btn-outline-success btn-sm fw-bold"><i class="fa-solid fa-file-excel me-1"></i> Download XLS</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        const userDatabase = {
+            "user1": {
+                accNo: "0357XXXXXXXX5806",
+                rawTx: [
+                    { date: "2025-01-10", id: "INFT/00192841", remarks: "Opening Balance Credit", type: "credit", amount: 20000.00 },
+                    { date: "2025-03-15", id: "NEFT/882194012", remarks: "Monthly Interest Credit", type: "credit", amount: 1250.00 },
+                    { date: "2025-07-12", id: "UPI/326316886", remarks: "Credited by AZEEM AHAMAD", type: "credit", amount: 100.00 },
+                    { date: "2025-11-05", id: "UPI/326426291", remarks: "Debited to MSANDCO COMPANY", type: "debit", amount: 100.00 },
+                    { date: "2026-02-14", id: "UPI/326450278", remarks: "Credited by ASHISH GUPTA", type: "credit", amount: 540.00 },
+                    { date: "2026-05-10", id: "IMPS/992014812", remarks: "Debited for Electricity Bill", type: "debit", amount: 1840.00 },
+                    { date: "2026-09-21", id: "UPI/363049279", remarks: "Debited for Swiggy Food Order", type: "debit", amount: 700.00 }
+                ]
+            },
+            "user2": {
+                accNo: "0357XXXXXXXX9012",
+                rawTx: [
+                    { date: "2025-02-01", id: "INFT/90012841", remarks: "Opening Balance Credit", type: "credit", amount: 35000.00 },
+                    { date: "2025-05-18", id: "UPI/991028341", remarks: "Freelance Project Payment", type: "credit", amount: 15000.00 },
+                    { date: "2025-09-12", id: "UPI/771029381", remarks: "Debited for Amazon Electronics", type: "debit", amount: 4500.00 },
+                    { date: "2026-01-10", id: "NEFT/331029381", remarks: "Debited for Laptop EMI", type: "debit", amount: 2500.00 },
+                    { date: "2026-06-22", id: "UPI/881029381", remarks: "Credited by Client Bonus", type: "credit", amount: 5000.00 },
+                    { date: "2026-09-18", id: "UPI/111029381", remarks: "Debited for Gym Membership", type: "debit", amount: 2750.00 }
+                ]
+            },
+            "user3": {
+                accNo: "0357XXXXXXXX3456",
+                rawTx: [
+                    { date: "2025-01-15", id: "INFT/50012841", remarks: "Opening Balance Credit", type: "credit", amount: 10000.00 },
+                    { date: "2025-06-20", id: "UPI/441029381", remarks: "Pocket Money Credit", type: "credit", amount: 5000.00 },
+                    { date: "2025-10-11", id: "UPI/221029381", remarks: "Debited for College Fees", type: "debit", amount: 3500.00 },
+                    { date: "2026-03-05", id: "IMPS/661029381", remarks: "Debited for Bike Service", type: "debit", amount: 1200.00 },
+                    { date: "2026-07-19", id: "UPI/331029381", remarks: "Credited by Friend Transfer", type: "credit", amount: 3000.00 },
+                    { date: "2026-09-25", id: "UPI/551029381", remarks: "Debited for Canteen UPI", type: "debit", amount: 499.50 }
+                ]
+            },
+            "user4": {
+                accNo: "0357XXXXXXXX7890",
+                rawTx: [
+                    { date: "2025-01-05", id: "INFT/60012841", remarks: "Opening Balance Credit", type: "credit", amount: 25000.00 },
+                    { date: "2025-08-14", id: "NEFT/221029381", remarks: "Salary Credit", type: "credit", amount: 18000.00 },
+                    { date: "2025-12-20", id: "UPI/111029381", remarks: "Debited for Shopping", type: "debit", amount: 6500.00 },
+                    { date: "2026-04-12", id: "UPI/991029381", remarks: "Debited for Zomato Orders", type: "debit", amount: 1100.00 },
+                    { date: "2026-08-30", id: "IMPS/881029381", remarks: "Debited for Rent Share", type: "debit", amount: 4000.00 }
+                ]
+            }
+        };
+
+        let currentDisplayTx = [];
+
+        function loadUserData() {
+            const userData = JSON.parse(localStorage.getItem('user') || '{}');
+            const username = userData.username || 'user1';
+            
+            document.getElementById('userNameDisplay').innerText = userData.fullName || 'Customer User';
+
+            const currentUserObj = userDatabase[username] || userDatabase["user1"];
+            
+            document.getElementById('accNoDisplay').innerText = `Acc No: ${currentUserObj.accNo}`;
+            document.getElementById('modalAccSelect').innerHTML = `<option selected>${currentUserObj.accNo} (Savings Account)</option>`;
+
+            let runningBalance = 0;
+            const calculated = currentUserObj.rawTx.map(tx => {
+                if (tx.type === 'credit') runningBalance += tx.amount;
+                else runningBalance -= tx.amount;
+                return { ...tx, balance: runningBalance.toFixed(2) };
+            });
+
+            currentDisplayTx = [...calculated].reverse();
+
+            const container = document.getElementById('homepageTransactions');
+            const latestBalance = currentDisplayTx[0].balance;
+            
+            document.getElementById('currentBalanceDisplay').innerText = `₹ ${Number(latestBalance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+            
+            container.innerHTML = '';
+            currentDisplayTx.slice(0, 5).forEach(tx => {
+                const isDebit = tx.type === 'debit';
+                container.innerHTML += `
+                    <div class="transaction-item ${isDebit ? 'debit' : 'credit'}">
+                        <div>
+                            <strong class="d-block text-dark" style="font-size: 0.88rem;">${tx.id}</strong>
+                            <small class="text-muted d-block">${tx.remarks}</small>
+                            <small class="text-muted" style="font-size: 0.72rem;"><i class="fa-regular fa-calendar me-1"></i>${tx.date}</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="${isDebit ? 'amount-debit' : 'amount-credit'}">
+                                ${isDebit ? '-' : '+'} ₹ ${tx.amount.toFixed(2)}
+                            </span>
+                            <small class="d-block text-muted" style="font-size: 0.72rem;">Bal: ₹ ${Number(tx.balance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</small>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        document.getElementById('searchBtn').addEventListener('click', () => {
+            const period = document.getElementById('periodSelect').value;
+            const resultSection = document.getElementById('statementResultSection');
+            const listContainer = document.getElementById('statementList');
+
+            let filtered = currentDisplayTx;
+            if (period === '2026') filtered = currentDisplayTx.filter(t => t.date.startsWith('2026'));
+            if (period === '2025') filtered = currentDisplayTx.filter(t => t.date.startsWith('2025'));
+
+            listContainer.innerHTML = '';
+            filtered.forEach(tx => {
+                const isDebit = tx.type === 'debit';
+                listContainer.innerHTML += `
+                    <div class="transaction-item ${isDebit ? 'debit' : 'credit'} mb-2 p-2">
+                        <div>
+                            <strong class="d-block text-dark" style="font-size: 0.85rem;">${tx.id}</strong>
+                            <small class="text-muted d-block" style="font-size: 0.78rem;">${tx.remarks}</small>
+                            <small class="text-muted" style="font-size: 0.72rem;"><i class="fa-regular fa-calendar me-1"></i>${tx.date}</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="${isDebit ? 'amount-debit' : 'amount-credit'}" style="font-size: 0.9rem;">
+                                ${isDebit ? '-' : '+'} ₹ ${tx.amount.toFixed(2)}
+                            </span>
+                            <small class="d-block text-muted" style="font-size: 0.72rem;">Bal: ₹ ${Number(tx.balance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</small>
+                        </div>
+                    </div>
+                `;
+            });
+
+            resultSection.style.display = 'block';
+        });
+
+        document.getElementById('downloadPdfBtn').addEventListener('click', () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+            doc.setFillColor(217, 35, 45);
+            doc.rect(0, 0, 210, 25, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(14);
+            doc.text("The Mumbai Co-Op. Credit Society Ltd.", 14, 16);
+
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(10);
+            doc.text(`Account Holder: ${user.fullName || 'Customer User'}`, 14, 35);
+
+            const tableRows = currentDisplayTx.map(tx => [
+                tx.date,
+                tx.id + "\n" + tx.remarks,
+                tx.type.toUpperCase(),
+                "Rs. " + tx.amount.toFixed(2),
+                "Rs. " + Number(tx.balance).toLocaleString('en-IN', { minimumFractionDigits: 2 })
+            ]);
+
+            doc.autoTable({
+                startY: 48,
+                head: [['Date', 'Transaction Details', 'Type', 'Amount', 'Balance']],
+                body: tableRows,
+                headStyles: { fillColor: [217, 35, 45] }
+            });
+
+            doc.save(`Statement_${user.fullName || 'User'}.pdf`);
+        });
+
+        document.getElementById('downloadXlsBtn').addEventListener('click', () => {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const worksheetData = [
+                ["The Mumbai Co-Op. Credit Society Ltd."],
+                [`Account Holder: ${user.fullName || 'Customer User'}`],
+                ["Date", "Reference ID", "Remarks", "Type", "Amount (INR)", "Running Balance (INR)"]
+            ];
+
+            currentDisplayTx.forEach(tx => {
+                worksheetData.push([
+                    tx.date,
+                    tx.id,
+                    tx.remarks,
+                    tx.type.toUpperCase(),
+                    tx.type === 'debit' ? -tx.amount : tx.amount,
+                    tx.balance
+                ]);
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Statement");
+            XLSX.writeFile(wb, `Statement_${user.fullName || 'User'}.xlsx`);
+        });
+
+        document.addEventListener('DOMContentLoaded', loadUserData);
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('user');
+            window.location.href = '/index.html';
+        });
+    </script>
+</body>
+</html>
